@@ -1,0 +1,1 @@
+This repository consolidates architecture work developed across 2025 and 2026 into public reference notes and synthetic examples.
