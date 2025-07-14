@@ -1,0 +1,35 @@
+%% Proposal vs. Execution — the core separation.
+%% The agent never causes a side effect directly; it only emits a proposal.
+%% A deterministic control plane decides whether to execute, and always records.
+sequenceDiagram
+    autonumber
+    participant U as Trigger / Context
+    participant A as Agent (model)
+    participant CP as Control Plane (deterministic)
+    participant SoR as System of Record
+    participant L as Decision Log
+
+    U->>A: task + context
+    Note over A: reasons, but cannot act
+    A->>CP: Proposal { action, params, rationale, confidence, reversibility }
+
+    CP->>CP: validate & normalize proposal
+    alt proposal malformed
+        CP->>L: record REJECTED (invalid)
+        CP-->>A: rejection + reason
+    else proposal well-formed
+        CP->>CP: classify reversibility (independent of agent claim)
+        CP->>CP: authority check (see note 02)
+        alt not authorized
+            CP->>L: record REJECTED (unauthorized)
+            CP-->>A: rejection + reason
+        else authorized, human approval required
+            CP->>L: record DEFERRED (awaiting human)
+            Note over CP: routed to Human Approval Gate
+        else authorized, auto-approve
+            CP->>SoR: execute action
+            SoR-->>CP: outcome
+            CP->>L: record EXECUTED (outcome, correlation IDs)
+            CP-->>A: result
+        end
+    end

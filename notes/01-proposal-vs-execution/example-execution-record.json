@@ -1,0 +1,40 @@
+{
+  "$schema": "https://example.invalid/schemas/execution-record/v1.json",
+  "record_id": "exec_2b7d40f1-synthetic",
+  "proposal_id": "prop_9f3c1a7e-synthetic",
+  "decided_at": "2026-03-04T14:22:09Z",
+  "decision": "executed",
+  "decided_by": {
+    "kind": "control_plane",
+    "component": "execution-gate",
+    "policy_version": "2026.02.14"
+  },
+  "authority_evaluation": {
+    "actor": "vendor-onboarding-assistant",
+    "granted_scope": "vendor.create:standard-band",
+    "result": "authorized",
+    "human_approval_required": false,
+    "reason": "action within auto-approve band for office-supplies category and credit limit <= $50k"
+  },
+  "reversibility_classification": {
+    "control_plane_verdict": "reversible",
+    "agreed_with_agent_claim": true,
+    "basis": "no payment instrument affected; record can be deactivated prior to first disbursement"
+  },
+  "outcome": {
+    "status": "success",
+    "target_system": "erp.vendors",
+    "system_of_record_effect": {
+      "operation": "insert",
+      "entity": "vendor",
+      "entity_id": "vnd_00184-synthetic"
+    },
+    "duration_ms": 412
+  },
+  "correlation": {
+    "run_id": "run_4d21b8c0-synthetic",
+    "intake_id": "intake_7a90-synthetic",
+    "trace_id": "trace_c81f-synthetic"
+  },
+  "notes": "Auto-approved. No human in the loop for this decision. Rejected or deferred proposals would carry the same record shape with a different `decision` value."
+}

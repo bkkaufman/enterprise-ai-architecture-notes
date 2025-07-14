@@ -1,0 +1,43 @@
+{
+  "$schema": "https://example.invalid/schemas/proposal/v1.json",
+  "proposal_id": "prop_9f3c1a7e-synthetic",
+  "created_at": "2026-03-04T14:22:07Z",
+  "agent": {
+    "agent_id": "vendor-onboarding-assistant",
+    "version": "2026.02.1",
+    "run_id": "run_4d21b8c0-synthetic"
+  },
+  "action": {
+    "type": "create_vendor_record",
+    "target_system": "erp.vendors",
+    "parameters": {
+      "legal_name": "Northwind Synthetic Supplies LLC",
+      "tax_id_provided": true,
+      "payment_terms": "NET30",
+      "category": "office-supplies",
+      "requested_credit_limit_usd": 25000
+    }
+  },
+  "rationale": "Onboarding request submitted through the intake form passed all document-completeness checks. Tax ID, W-9 equivalent, and banking verification letter are present. Requested terms (NET30, $25k limit) are within the standard band for this vendor category, so this can proceed as a routine record creation rather than an escalated one.",
+  "confidence": 0.86,
+  "reversibility": {
+    "agent_claim": "reversible",
+    "note": "Vendor record can be deactivated before any payment is issued."
+  },
+  "supporting_evidence": [
+    {
+      "kind": "document_check",
+      "detail": "intake bundle passed completeness validation",
+      "reference": "intake_7a90-synthetic"
+    },
+    {
+      "kind": "policy_lookup",
+      "detail": "NET30 and $25k limit within standard band for office-supplies",
+      "reference": "policy://vendor-terms/office-supplies"
+    }
+  ],
+  "constraints_observed": [
+    "no bank account number included in proposal payload",
+    "credit limit within category standard band"
+  ]
+}
