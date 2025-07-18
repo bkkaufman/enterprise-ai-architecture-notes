@@ -1,0 +1,75 @@
+# Synthetic authority policy — illustrative only.
+# Declarative, human-readable on purpose: risk and compliance reviewers must be
+# able to read this without engineering help. Nothing here maps to a real system.
+version: "2026.02.14"
+
+# ---------------------------------------------------------------------------
+# Principals and the agents that act on their behalf.
+# An agent's authority is ALWAYS a subset of its principal's (delegation invariant).
+# ---------------------------------------------------------------------------
+principals:
+  - id: role:purchasing-manager
+    description: "Human role able to onboard vendors and set standard terms."
+    grants:
+      - vendor.create
+      - vendor.update
+      - vendor.set_terms:standard-band
+
+  - id: role:finance-controller
+    description: "Human role able to approve elevated credit and non-standard terms."
+    grants:
+      - vendor.create
+      - vendor.update
+      - vendor.set_terms:elevated-band
+      - vendor.approve_elevated
+
+agents:
+  - id: vendor-onboarding-assistant
+    acts_for: role:purchasing-manager
+    # Strictly narrower than the principal: no elevated terms, create only.
+    grants:
+      - vendor.create:standard-band
+      - vendor.update:non-financial-fields
+
+# ---------------------------------------------------------------------------
+# Scope bands referenced by grants and by approval routing.
+# ---------------------------------------------------------------------------
+bands:
+  standard-band:
+    payment_terms_in: [NET15, NET30]
+    credit_limit_usd_max: 50000
+  elevated-band:
+    payment_terms_in: [NET45, NET60]
+    credit_limit_usd_max: 250000
+
+# ---------------------------------------------------------------------------
+# Conditions evaluated against the proposal before an action is authorized.
+# ---------------------------------------------------------------------------
+conditions:
+  - action: vendor.create
+    require:
+      - proposal.parameters.tax_id_provided == true
+      - proposal.parameters.requested_credit_limit_usd <= bands[scope].credit_limit_usd_max
+      - proposal.parameters.payment_terms in bands[scope].payment_terms_in
+
+# ---------------------------------------------------------------------------
+# Approval routing: even when authorized, when must a human sign off?
+# See decision-table.md for the full matrix.
+# ---------------------------------------------------------------------------
+approval:
+  auto_approve_when_all:
+    - reversibility == "reversible"
+    - proposal.confidence >= 0.75
+    - proposal.parameters.requested_credit_limit_usd <= 50000
+    - data_classification != "regulated"
+  require_human_when_any:
+    - reversibility != "reversible"
+    - proposal.confidence < 0.75
+    - proposal.parameters.requested_credit_limit_usd > 50000
+    - data_classification == "regulated"
+    - action in [vendor.set_terms:elevated-band]
+  four_eyes_actions:
+    - vendor.approve_elevated
+
+# Approvals do not live forever.
+approval_ttl_minutes: 60
