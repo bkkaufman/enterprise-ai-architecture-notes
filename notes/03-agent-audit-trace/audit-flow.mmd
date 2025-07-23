@@ -1,0 +1,33 @@
+%% The audit trace is a graph of decision records, not a flat log.
+%% A single task can produce a chain: propose -> defer -> re-propose -> execute.
+%% Every node is an append-only decision record linked by run_id / trace_id.
+flowchart LR
+    subgraph run["run_id: run_4d21b8c0 (one task)"]
+        direction TB
+
+        P1[Proposal p1<br/>create_vendor_record]:::prop
+        R1[(Record: DEFERRED<br/>awaiting human<br/>reason: credit > $50k)]:::rec
+        P1 --> R1
+
+        H[Human approval gate<br/>approver: real identity]:::human
+        R1 --> H
+
+        RD[(Record: DENIED<br/>approver comment:<br/>'reduce limit to standard band')]:::rec
+        H -->|denied| RD
+
+        P2[Proposal p2<br/>create_vendor_record<br/>limit lowered to $25k<br/>links prior: p1]:::prop
+        RD -->|constraint fed back| P2
+
+        R2[(Record: EXECUTED<br/>links: p1, RD<br/>SoR effect: insert vnd_00184)]:::rec
+        P2 --> R2
+    end
+
+    R2 --> Q{{Investigator query:<br/>'why does vnd_00184 exist?'}}:::query
+    Q -.walk chain.-> R2
+    R2 -.prior.-> RD
+    RD -.prior.-> R1
+
+    classDef prop fill:#2a2a3a,stroke:#66a,color:#fff;
+    classDef rec fill:#2a2a2a,stroke:#888,color:#fff;
+    classDef human fill:#3a2a1a,stroke:#a83,color:#fff;
+    classDef query fill:#1a3a1a,stroke:#3a3,color:#fff;

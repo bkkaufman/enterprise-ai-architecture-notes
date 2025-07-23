@@ -1,0 +1,66 @@
+{
+  "$schema": "https://example.invalid/schemas/decision-record/v1.json",
+  "record_id": "dr_5c19ab30-synthetic",
+  "record_version": 1,
+  "sequence": 3,
+  "prev_record_hash": "sha256:8f14e45fceea167a5a36dedd4bea2543-synthetic",
+  "self_hash": "sha256:b1946ac92492d2347c6235b4d2611184-synthetic",
+  "created_at": "2026-03-04T14:31:52Z",
+
+  "decision": "executed",
+  "phase": "outcome",
+  "_phase_note": "Written AFTER the side effect. A matching phase:'intent' record was written BEFORE it (write-before-effect).",
+
+  "proposal": {
+    "proposal_id": "prop_1e77b420-synthetic",
+    "action": {
+      "type": "create_vendor_record",
+      "target_system": "erp.vendors",
+      "parameters": {
+        "legal_name": "Northwind Synthetic Supplies LLC",
+        "payment_terms": "NET30",
+        "requested_credit_limit_usd": 25000
+      }
+    },
+    "rationale": "Re-proposed after human denial of prior proposal; credit limit lowered from $75k to $25k per approver comment, bringing it into the standard band.",
+    "confidence": 0.91,
+    "reversibility": { "agent_claim": "reversible" }
+  },
+
+  "decided_by": {
+    "kind": "control_plane",
+    "component": "execution-gate",
+    "policy_version": "2026.02.14"
+  },
+
+  "authority_basis": {
+    "actor": "vendor-onboarding-assistant",
+    "principal": "role:purchasing-manager",
+    "grant_relied_on": "vendor.create:standard-band",
+    "delegation_ok": true,
+    "approval_route": "auto-approve",
+    "approval_route_reason": "matched auto-approve row: reversible, confidence>=0.75, limit<=$50k, non-regulated"
+  },
+
+  "outcome": {
+    "status": "success",
+    "system_of_record_effect": {
+      "operation": "insert",
+      "entity": "vendor",
+      "entity_id": "vnd_00184-synthetic"
+    },
+    "duration_ms": 388
+  },
+
+  "links": {
+    "supersedes_denial": "dr_44b9c2f0-synthetic",
+    "prior_proposal": "prop_9f3c1a7e-synthetic",
+    "run_id": "run_4d21b8c0-synthetic",
+    "trace_id": "trace_c81f-synthetic"
+  },
+
+  "redaction": {
+    "redacted_fields": ["proposal.parameters.tax_id_value"],
+    "note": "Value redacted for standard viewers; existence and shape retained. Redaction is not deletion."
+  }
+}
