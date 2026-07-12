@@ -14,7 +14,7 @@ decides whether to execute.**
 
 ## In scope
 
-- The proposal/execution separation and why it's the load-bearing seam.
+- The proposal/execution separation and why it's the load bearing seam.
 - Authority models and the delegation invariant (agent ⊆ principal).
 - Human approval routing: when a person must sign off, and what makes an approval
   real rather than theater.
@@ -30,7 +30,7 @@ decides whether to execute.**
 - **A reference implementation.** These are architecture notes, not a library. The
   JSON/YAML are illustrative schemas, not shipped code.
 - **Real deployments.** Nothing here describes any specific company's systems,
-  policies, or data. See [`publishing-boundary.md`](publishing-boundary.md).
+  policies, or data. Everything is synthetic.
 - **General MLOps / model training / eval pipelines.** Adjacent, not covered.
 
 ## Audience
@@ -42,7 +42,7 @@ decides whether to execute.**
 
 ## Stance
 
-Opinionated, not authoritative. The patterns reflect a particular bias — **fail
+Opinionated but not authoritative. The patterns reflect a particular bias — **fail
 closed, record everything, keep the model out of the execution path** — that suits
 regulated, audited environments. In a low-stakes internal tool, some of this is
 overkill; the notes say so where relevant.
@@ -51,5 +51,4 @@ overkill; the notes say so where relevant.
 
 Start with the [top-level README](../README.md), then the three notes in order —
 each builds on the last. The [patterns](../patterns/) are referenced throughout
-and can be read on demand. The [templates](../templates/) and this `docs/` folder
-are for *contributors* extending the notes.
+and can be read on demand.
