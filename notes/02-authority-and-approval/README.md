@@ -36,9 +36,41 @@ grant := actor may perform ACTION on SCOPE when CONDITIONS hold
 - **conditions** — predicates over the proposal and context (amount thresholds,
   time windows, data classification).
 
-See [`authority-model.mmd`](authority-model.mmd) for how a proposal flows through
-authority evaluation into an approval decision, and
+The diagram below shows how a proposal flows through authority evaluation into an
+approval decision (source: [`authority-model.mmd`](authority-model.mmd)); see
 [`authority-policy.yaml`](authority-policy.yaml) for a worked synthetic policy.
+
+```mermaid
+flowchart TD
+    P[Proposal from agent] --> V{Well-formed?}
+    V -- no --> RJ1[Reject: invalid]:::reject
+
+    V -- yes --> LOOKUP[Resolve actor + principal grants]
+    LOOKUP --> DELEG{Within principal's authority?<br/>agent subset of principal}
+    DELEG -- no --> RJ2[Reject: exceeds delegation]:::reject
+
+    DELEG -- yes --> AUTH{Actor holds grant for<br/>action @ scope, conditions met?}
+    AUTH -- no --> RJ3[Reject: unauthorized]:::reject
+
+    AUTH -- yes --> ROUTE{Approval required?<br/>irreversible / over threshold /<br/>sensitive data / low confidence / novel}
+    ROUTE -- yes --> HUMAN[Defer to Human Approval Gate]:::human
+    ROUTE -- no --> EXEC[Auto-approve in control plane]:::exec
+
+    HUMAN --> HD{Human decision}
+    HD -- approved --> EXEC
+    HD -- denied --> RJ4[Reject: denied by approver]:::reject
+
+    EXEC --> REC[(Decision Record)]:::record
+    RJ1 --> REC
+    RJ2 --> REC
+    RJ3 --> REC
+    RJ4 --> REC
+
+    classDef reject fill:#3a1a1a,stroke:#a33,color:#fff;
+    classDef human fill:#2a2a3a,stroke:#66a,color:#fff;
+    classDef exec fill:#1a3a1a,stroke:#3a3,color:#fff;
+    classDef record fill:#2a2a2a,stroke:#888,color:#fff;
+```
 
 ## The delegation invariant
 
@@ -101,3 +133,7 @@ If approval is to mean anything:
 - [Authority Gate](../../patterns/authority-gate.md)
 - [Human Approval Gate](../../patterns/human-approval-gate.md)
 - [Decision Record](../../patterns/decision-record.md)
+
+---
+
+[← 01 — Proposal vs. Execution](../01-proposal-vs-execution/) · [Home](../../README.md) · Next: [03 — Agent Audit Trace →](../03-agent-audit-trace/)

@@ -1,18 +1,12 @@
 # 03 — Agent Audit Trace
 
-> If you cannot reconstruct why an action happened, you did not control it — you
-> just got lucky.
+> If you cannot reconstruct why an action happened, you did not have the level of control needed.
 
-Notes 01 and 02 built the seam (proposal vs. execution) and the gates (authority,
-approval). This note is about the thing that makes all of it *accountable*: a
-durable trace that lets someone — days or months later, during an incident review
-or an audit — reconstruct exactly what the agent proposed, what the system
-decided, who decided it, and what happened to the systems of record.
+Notes 01 and 02 defined the boundary (**proposal vs. execution**) and the gates (**authority, approval**). This note is about the thing that makes all of it *accountable*: a durable trace that lets someone (whether it's days or months later, during an incident review or an audit) reconstruct exactly what the agent proposed, what the system decided, who decided it, and what happened to the systems of record.
 
-The audit trace is not logging. Logging is for engineers debugging. The audit
-trace is a **first-class product surface** with its own guarantees.
+An audit trace is different from application logging. Logs help engineers diagnose system behavior. An audit trace preserves the business decisions, approvals, evidence, and resulting actions needed to reconstruct an outcome.
 
-## What the trace must let you answer
+## What the trace must allow you to answer
 
 For any effect on a system of record, an investigator must be able to answer, from
 the trace alone:
@@ -24,16 +18,11 @@ the trace alone:
 5. **What was the context?** The trigger, the inputs the agent saw, the model/agent version.
 6. **What else did this touch?** Everything correlated to the same run/trace.
 
-If a field is missing, the corresponding question is unanswerable, and the trace
-has failed at exactly the moment it mattered.
+If a field is missing, the corresponding question is unanswerable, and the trace has failed at exactly the moment it mattered.
 
 ## The unit of the trace: the decision record
 
-The atom of the audit trace is the **decision record** — one per proposal that
-reached the control plane, whether it was executed, rejected, or deferred. See
-[`decision-record.json`](decision-record.json) for a complete synthetic record,
-and the [Decision Record pattern](../../patterns/decision-record.md) for the
-schema and invariants.
+The atom of the audit trace is the **decision record** — one per proposal that reached the control plane, whether it was executed, rejected, or deferred. See [`decision-record.json`](decision-record.json) for a complete synthetic record, and the [Decision Record pattern](../../patterns/decision-record.md) for the schema and invariants.
 
 Every decision record is:
 
@@ -51,8 +40,42 @@ A single task rarely produces a single proposal. It produces a *chain*: propose 
 maybe defer → maybe re-propose under a constraint → execute. The audit trace is
 therefore a graph, not a line.
 
-See [`audit-flow.mmd`](audit-flow.mmd) for how records link into a reconstructable
-chain, including the branches for rejection and human deferral.
+The diagram below shows how records link into a reconstructable chain — including
+the branches for denial and human deferral, and an investigator walking it backward
+(source: [`audit-flow.mmd`](audit-flow.mmd)):
+
+```mermaid
+flowchart LR
+    subgraph run["run_id: run_4d21b8c0 (one task)"]
+        direction TB
+
+        P1[Proposal p1<br/>create_vendor_record]:::prop
+        R1[(Record: DEFERRED<br/>awaiting human<br/>reason: credit > $50k)]:::rec
+        P1 --> R1
+
+        H[Human approval gate<br/>approver: real identity]:::human
+        R1 --> H
+
+        RD[(Record: DENIED<br/>approver comment:<br/>'reduce limit to standard band')]:::rec
+        H -->|denied| RD
+
+        P2[Proposal p2<br/>create_vendor_record<br/>limit lowered to $25k<br/>links prior: p1]:::prop
+        RD -->|constraint fed back| P2
+
+        R2[(Record: EXECUTED<br/>links: p1, RD<br/>SoR effect: insert vnd_00184)]:::rec
+        P2 --> R2
+    end
+
+    R2 --> Q{{Investigator query:<br/>'why does vnd_00184 exist?'}}:::query
+    Q -.walk chain.-> R2
+    R2 -.prior.-> RD
+    RD -.prior.-> R1
+
+    classDef prop fill:#2a2a3a,stroke:#66a,color:#fff;
+    classDef rec fill:#2a2a2a,stroke:#888,color:#fff;
+    classDef human fill:#3a2a1a,stroke:#a83,color:#fff;
+    classDef query fill:#1a3a1a,stroke:#3a3,color:#fff;
+```
 
 ## Non-negotiable properties
 
@@ -86,3 +109,7 @@ trace didn't capture the one field that mattered.
 - [Decision Record](../../patterns/decision-record.md)
 - [Execution Gate](../../patterns/execution-gate.md)
 - [Human Approval Gate](../../patterns/human-approval-gate.md)
+
+---
+
+[← 02 — Authority and Approval](../02-authority-and-approval/) · [Home](../../README.md) · Next: [Worked example: Vendor Onboarding →](../../examples/synthetic-vendor-onboarding/)
