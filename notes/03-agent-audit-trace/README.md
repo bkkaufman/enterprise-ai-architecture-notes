@@ -1,18 +1,12 @@
 # 03 — Agent Audit Trace
 
-> If you cannot reconstruct why an action happened, you did not control it — you
-> just got lucky.
+> If you cannot reconstruct why an action happened, you did not have the level of control needed.
 
-Notes 01 and 02 built the seam (proposal vs. execution) and the gates (authority,
-approval). This note is about the thing that makes all of it *accountable*: a
-durable trace that lets someone — days or months later, during an incident review
-or an audit — reconstruct exactly what the agent proposed, what the system
-decided, who decided it, and what happened to the systems of record.
+Notes 01 and 02 defined the boundary (**proposal vs. execution**) and the gates (**authority, approval**). This note is about the thing that makes all of it *accountable*: a durable trace that lets someone (whether it's days or months later, during an incident review or an audit) reconstruct exactly what the agent proposed, what the system decided, who decided it, and what happened to the systems of record.
 
-The audit trace is not logging. Logging is for engineers debugging. The audit
-trace is a **first-class product surface** with its own guarantees.
+An audit trace is different from application logging. Logs help engineers diagnose system behavior. An audit trace preserves the business decisions, approvals, evidence, and resulting actions needed to reconstruct an outcome.
 
-## What the trace must let you answer
+## What the trace must allow you to answer
 
 For any effect on a system of record, an investigator must be able to answer, from
 the trace alone:
@@ -24,16 +18,11 @@ the trace alone:
 5. **What was the context?** The trigger, the inputs the agent saw, the model/agent version.
 6. **What else did this touch?** Everything correlated to the same run/trace.
 
-If a field is missing, the corresponding question is unanswerable, and the trace
-has failed at exactly the moment it mattered.
+If a field is missing, the corresponding question is unanswerable, and the trace has failed at exactly the moment it mattered.
 
 ## The unit of the trace: the decision record
 
-The atom of the audit trace is the **decision record** — one per proposal that
-reached the control plane, whether it was executed, rejected, or deferred. See
-[`decision-record.json`](decision-record.json) for a complete synthetic record,
-and the [Decision Record pattern](../../patterns/decision-record.md) for the
-schema and invariants.
+The atom of the audit trace is the **decision record** — one per proposal that reached the control plane, whether it was executed, rejected, or deferred. See [`decision-record.json`](decision-record.json) for a complete synthetic record, and the [Decision Record pattern](../../patterns/decision-record.md) for the schema and invariants.
 
 Every decision record is:
 
