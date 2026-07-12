@@ -47,7 +47,43 @@ policy), and either executes it or rejects it. Whatever it does, it writes an
 
 The model never touches a system of record. It only ever produces proposals.
 
-See [`flow.mmd`](flow.mmd) for the full sequence.
+The full sequence — validation, reversibility classification, the authority check,
+and the auto-approve vs. defer branches — is below (source: [`flow.mmd`](flow.mmd)):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as Trigger / Context
+    participant A as Agent (model)
+    participant CP as Control Plane (deterministic)
+    participant SoR as System of Record
+    participant L as Decision Log
+
+    U->>A: task + context
+    Note over A: reasons, but cannot act
+    A->>CP: Proposal { action, params, rationale, confidence, reversibility }
+
+    CP->>CP: validate & normalize proposal
+    alt proposal malformed
+        CP->>L: record REJECTED (invalid)
+        CP-->>A: rejection + reason
+    else proposal well-formed
+        CP->>CP: classify reversibility (independent of agent claim)
+        CP->>CP: authority check (see note 02)
+        alt not authorized
+            CP->>L: record REJECTED (unauthorized)
+            CP-->>A: rejection + reason
+        else authorized, human approval required
+            CP->>L: record DEFERRED (awaiting human)
+            Note over CP: routed to Human Approval Gate
+        else authorized, auto-approve
+            CP->>SoR: execute action
+            SoR-->>CP: outcome
+            CP->>L: record EXECUTED (outcome, correlation IDs)
+            CP-->>A: result
+        end
+    end
+```
 
 ## What a proposal is
 
@@ -112,3 +148,7 @@ proposal object is the thing they all attach to.
 - [Proposal Gate](../../patterns/proposal-gate.md)
 - [Execution Gate](../../patterns/execution-gate.md)
 - [Decision Record](../../patterns/decision-record.md)
+
+---
+
+[← Home](../../README.md) · Next: [02 — Authority and Approval →](../02-authority-and-approval/)

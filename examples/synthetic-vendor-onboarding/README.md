@@ -1,8 +1,8 @@
 # Synthetic Example: Vendor Onboarding
 
 > **All data in this example is synthetic.** No real vendor, customer, employee,
-> credential, or internal system is described. See
-> [`../../docs/publishing-boundary.md`](../../docs/publishing-boundary.md).
+> credential, or internal system is described. Identifiers carry a `-synthetic`
+> suffix and hosts use `example.invalid`.
 
 This is the end-to-end scenario the three notes draw their fragments from. It ties
 [Proposal vs. Execution](../../notes/01-proposal-vs-execution/),
@@ -73,3 +73,7 @@ and [`decision-table.md`](../../notes/02-authority-and-approval/decision-table.m
   supersedes — so a retry can't launder a rejected action past the human gate.
 - An **audit trace you can walk backward** from a system-of-record entity to the
   original intent.
+
+---
+
+[← 03 — Agent Audit Trace](../../notes/03-agent-audit-trace/) · [Home](../../README.md)
